@@ -1,0 +1,1848 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Knighted API — resume builder, AI tailoring, and job board endpoints
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: resume-ready
+    description: ResumeReady app endpoints
+  - name: knighted-jobs
+    description: KnightedJobs job board endpoints
+paths:
+  /resume-ready/me:
+    get:
+      operationId: getMyProfile
+      tags: [resume-ready]
+      summary: Get current user profile and subscription tier
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Unauthorized
+
+  /resume-ready/dashboard:
+    get:
+      operationId: getDashboardSummary
+      tags: [resume-ready]
+      summary: Dashboard summary counts
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+        "401":
+          description: Unauthorized
+
+  /resume-ready/resumes:
+    get:
+      operationId: listResumes
+      tags: [resume-ready]
+      summary: List all resumes for the current user
+      responses:
+        "200":
+          description: List of resumes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Resume"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: createResume
+      tags: [resume-ready]
+      summary: Create a new resume
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResumeInput"
+      responses:
+        "201":
+          description: Created resume
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resume"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Free tier limit reached
+
+  /resume-ready/resumes/{id}:
+    get:
+      operationId: getResume
+      tags: [resume-ready]
+      summary: Get a single resume
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Resume
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resume"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateResume
+      tags: [resume-ready]
+      summary: Update a resume
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResumePatch"
+      responses:
+        "200":
+          description: Updated resume
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resume"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteResume
+      tags: [resume-ready]
+      summary: Delete a resume
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /resume-ready/applications:
+    get:
+      operationId: listApplications
+      tags: [resume-ready]
+      summary: List all job applications for the current user
+      responses:
+        "200":
+          description: List of applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JobApplication"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: createApplication
+      tags: [resume-ready]
+      summary: Create a job application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationInput"
+      responses:
+        "201":
+          description: Created application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobApplication"
+        "401":
+          description: Unauthorized
+
+  /resume-ready/applications/{id}:
+    patch:
+      operationId: updateApplication
+      tags: [resume-ready]
+      summary: Update a job application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationPatch"
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobApplication"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteApplication
+      tags: [resume-ready]
+      summary: Delete a job application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /resume-ready/ai/tailor:
+    post:
+      operationId: tailorResume
+      tags: [resume-ready]
+      summary: AI-tailor resume bullets to a job description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TailorInput"
+      responses:
+        "200":
+          description: Tailored content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TailorResult"
+        "401":
+          description: Unauthorized
+
+  /resume-ready/ai/feedback:
+    post:
+      operationId: resumeFeedback
+      tags: [resume-ready]
+      summary: Get ATS feedback on a resume
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackInput"
+      responses:
+        "200":
+          description: Feedback suggestions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackResult"
+        "401":
+          description: Unauthorized
+
+  /resume-ready/jobs/search:
+    post:
+      operationId: searchJobs
+      tags: [resume-ready]
+      summary: Search for jobs matched to a resume using AI keyword extraction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobSearchInput"
+      responses:
+        "200":
+          description: Job search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobSearchResults"
+        "401":
+          description: Unauthorized
+        "503":
+          description: Job search not configured
+
+  /resume-ready/cover-letters:
+    get:
+      operationId: listCoverLetters
+      tags: [resume-ready]
+      summary: List all cover letters for the current user
+      responses:
+        "200":
+          description: List of cover letters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CoverLetter"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: createCoverLetter
+      tags: [resume-ready]
+      summary: Create a new cover letter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CoverLetterInput"
+      responses:
+        "201":
+          description: Created cover letter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoverLetter"
+        "401":
+          description: Unauthorized
+
+  /resume-ready/cover-letters/{id}:
+    get:
+      operationId: getCoverLetter
+      tags: [resume-ready]
+      summary: Get a single cover letter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Cover letter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoverLetter"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateCoverLetter
+      tags: [resume-ready]
+      summary: Update a cover letter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CoverLetterPatch"
+      responses:
+        "200":
+          description: Updated cover letter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoverLetter"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteCoverLetter
+      tags: [resume-ready]
+      summary: Delete a cover letter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /resume-ready/interview-notes:
+    get:
+      operationId: listInterviewNotes
+      tags: [resume-ready]
+      summary: List all interview notes for the current user
+      responses:
+        "200":
+          description: List of interview notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InterviewNote"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: createInterviewNote
+      tags: [resume-ready]
+      summary: Create an interview note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InterviewNoteInput"
+      responses:
+        "201":
+          description: Created note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InterviewNote"
+        "401":
+          description: Unauthorized
+
+  /resume-ready/interview-notes/{id}:
+    patch:
+      operationId: updateInterviewNote
+      tags: [resume-ready]
+      summary: Update an interview note
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InterviewNotePatch"
+      responses:
+        "200":
+          description: Updated note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InterviewNote"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteInterviewNote
+      tags: [resume-ready]
+      summary: Delete an interview note
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /resume-ready/ki-conversations:
+    get:
+      operationId: listKiConversations
+      tags: [resume-ready]
+      summary: List all KI chat conversations for the current user
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/KiConversation"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: createKiConversation
+      tags: [resume-ready]
+      summary: Create a new KI conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KiConversationInput"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KiConversation"
+        "401":
+          description: Unauthorized
+
+  /resume-ready/ki-conversations/{id}:
+    get:
+      operationId: getKiConversation
+      tags: [resume-ready]
+      summary: Get a KI conversation with all its messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KiConversationDetail"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteKiConversation
+      tags: [resume-ready]
+      summary: Delete a KI conversation and its messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /resume-ready/ki-conversations/{id}/messages:
+    post:
+      operationId: appendKiMessages
+      tags: [resume-ready]
+      summary: Append messages to a KI conversation after a completed exchange
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KiAppendMessagesInput"
+      responses:
+        "200":
+          description: Updated conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KiConversation"
+        "404":
+          description: Not found
+
+  /resume-ready/ai/cover-letter:
+    post:
+      operationId: generateCoverLetter
+      tags: [resume-ready]
+      summary: AI-generate a cover letter from a resume and job description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CoverLetterGenerateInput"
+      responses:
+        "200":
+          description: Generated cover letter content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoverLetterGenerateResult"
+        "401":
+          description: Unauthorized
+
+  /resume-ready/billing/create-checkout-session:
+    post:
+      operationId: createCheckoutSession
+      tags: [resume-ready]
+      summary: Create a Stripe Checkout session for Pro upgrade
+      responses:
+        "200":
+          description: Checkout session URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSession"
+        "401":
+          description: Unauthorized
+
+  /resume-ready/billing/webhook:
+    post:
+      operationId: stripeWebhook
+      tags: [resume-ready]
+      summary: Stripe webhook handler
+      responses:
+        "200":
+          description: Acknowledged
+
+  /knighted-jobs/search:
+    get:
+      operationId: searchKnightedJobs
+      tags: [knighted-jobs]
+      summary: Search jobs from Adzuna and employer-posted listings
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: location
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [full_time, part_time, contract, internship]
+        - name: remote
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: salaryDisclosed
+          in: query
+          schema:
+            type: boolean
+        - name: seniority
+          in: query
+          schema:
+            type: string
+            enum: [entry, analyst, senior, manager, executive]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [relevance, newest, salary_desc]
+        - name: postedWithin
+          in: query
+          schema:
+            type: integer
+            description: Show only jobs posted within this many days (e.g. 7, 14, 30)
+        - name: minSalary
+          in: query
+          schema:
+            type: integer
+            description: Minimum annual salary
+        - name: maxSalary
+          in: query
+          schema:
+            type: integer
+            description: Maximum annual salary
+      responses:
+        "200":
+          description: Combined job search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnightedJobSearchResult"
+
+  /knighted-jobs/listings:
+    get:
+      operationId: listKnightedListings
+      tags: [knighted-jobs]
+      summary: List recent employer-posted job listings
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Employer-posted listings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnightedListingsPage"
+    post:
+      operationId: createKnightedListing
+      tags: [knighted-jobs]
+      summary: Post a new employer job listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KnightedListingInput"
+      responses:
+        "201":
+          description: Created listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnightedListing"
+        "400":
+          description: Validation error
+
+  /knighted-jobs/listings/{id}:
+    get:
+      operationId: getKnightedListing
+      tags: [knighted-jobs]
+      summary: Get a single employer-posted listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Listing detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnightedListing"
+        "404":
+          description: Not found
+
+  /knighted-jobs/stats:
+    get:
+      operationId: getKnightedJobStats
+      tags: [knighted-jobs]
+      summary: Job board stats for the homepage
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnightedJobStats"
+
+  /knighted-jobs/listings/{id}/apply:
+    post:
+      operationId: applyToListing
+      tags: [knighted-jobs]
+      summary: Submit an application for a direct employer listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobApplicationInput"
+      responses:
+        "201":
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id:
+                    type: integer
+        "400":
+          description: Validation error
+        "404":
+          description: Listing not found
+
+  /knighted-jobs/alerts:
+    get:
+      operationId: getJobAlerts
+      tags: [knighted-jobs]
+      summary: List the authenticated user's job alerts
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Job alerts list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [alerts]
+                properties:
+                  alerts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/KnightedJobAlert"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: createJobAlert
+      tags: [knighted-jobs]
+      summary: Create a job alert for the authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateJobAlertInput"
+      responses:
+        "201":
+          description: Alert created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnightedJobAlert"
+        "400":
+          description: Validation error
+        "401":
+          description: Unauthorized
+
+  /knighted-jobs/alerts/{id}:
+    delete:
+      operationId: deleteJobAlert
+      tags: [knighted-jobs]
+      summary: Delete a job alert
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+
+  /knighted-jobs/saved:
+    get:
+      operationId: getSavedJobs
+      tags: [knighted-jobs]
+      summary: List the authenticated user's saved jobs
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Saved jobs list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnightedSavedJobsPage"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: saveJob
+      tags: [knighted-jobs]
+      summary: Save a job for the authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveJobInput"
+      responses:
+        "201":
+          description: Job saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnightedSavedJob"
+        "400":
+          description: Validation error
+        "401":
+          description: Unauthorized
+
+  /knighted-jobs/saved/{jobId}:
+    delete:
+      operationId: unsaveJob
+      tags: [knighted-jobs]
+      summary: Remove a saved job for the authenticated user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Unsaved successfully
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+
+  /knighted-jobs/profile:
+    get:
+      operationId: getSeekerProfile
+      tags: [knighted-jobs]
+      summary: Get the authenticated user's job seeker profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Seeker profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeekerProfile"
+        "401":
+          description: Unauthorized
+    patch:
+      operationId: updateSeekerProfile
+      tags: [knighted-jobs]
+      summary: Create or update the authenticated user's job seeker profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SeekerProfileInput"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeekerProfile"
+        "401":
+          description: Unauthorized
+
+  /knighted-jobs/match-score:
+    post:
+      operationId: getMatchScore
+      tags: [knighted-jobs]
+      summary: AI-powered resume-to-job match scoring
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatchScoreInput"
+      responses:
+        "200":
+          description: Match analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchScoreResult"
+        "400":
+          description: Invalid input
+
+  /knighted-jobs/recommendations:
+    get:
+      operationId: getRecommendations
+      tags: [knighted-jobs]
+      summary: Get personalized job recommendations based on seeker profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Personalized job recommendations
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [listings]
+                properties:
+                  listings:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/KnightedListing"
+        "401":
+          description: Unauthorized
+
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+components:
+  schemas:
+    UserProfile:
+      type: object
+      required: [clerkId, email, tier, resumeCount]
+      properties:
+        clerkId:
+          type: string
+        email:
+          type: string
+        tier:
+          type: string
+        stripeCustomerId:
+          type: ["string", "null"]
+        stripeSubscriptionId:
+          type: ["string", "null"]
+        resumeCount:
+          type: integer
+
+    DashboardSummary:
+      type: object
+      required: [resumeCount, applicationCount, tier, applicationsByStatus]
+      properties:
+        resumeCount:
+          type: integer
+        applicationCount:
+          type: integer
+        tier:
+          type: string
+        applicationsByStatus:
+          type: object
+          additionalProperties:
+            type: integer
+
+    Resume:
+      type: object
+      required: [id, userId, title, content, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ResumeInput:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        content:
+          type: string
+
+    ResumePatch:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        content:
+          type: string
+
+    InterviewEntry:
+      type: object
+      required: [id, date, type]
+      properties:
+        id:
+          type: string
+        date:
+          type: string
+          format: date
+        type:
+          type: string
+          enum: [phone, in_person, online, other]
+        notes:
+          type: string
+
+    JobApplication:
+      type: object
+      required: [id, userId, company, role, status, appliedAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        company:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        notes:
+          type: ["string", "null"]
+        url:
+          type: ["string", "null"]
+        salary:
+          type: ["string", "null"]
+        recruiterName:
+          type: ["string", "null"]
+        recruiterEmail:
+          type: ["string", "null"]
+        interviewDate:
+          type: ["string", "null"]
+        deadline:
+          type: ["string", "null"]
+        appliedDate:
+          type: ["string", "null"]
+        interviews:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/InterviewEntry"
+        appliedAt:
+          type: string
+
+    ApplicationInput:
+      type: object
+      required: [company, role, status]
+      properties:
+        company:
+          type: string
+          minLength: 1
+        role:
+          type: string
+          minLength: 1
+        status:
+          type: string
+        notes:
+          type: string
+        url:
+          type: string
+        salary:
+          type: string
+        recruiterName:
+          type: string
+        recruiterEmail:
+          type: string
+        interviewDate:
+          type: string
+        deadline:
+          type: string
+        appliedDate:
+          type: string
+        interviews:
+          type: array
+          items:
+            $ref: "#/components/schemas/InterviewEntry"
+
+    ApplicationPatch:
+      type: object
+      properties:
+        company:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        notes:
+          type: ["string", "null"]
+        url:
+          type: ["string", "null"]
+        salary:
+          type: ["string", "null"]
+        recruiterName:
+          type: ["string", "null"]
+        recruiterEmail:
+          type: ["string", "null"]
+        interviewDate:
+          type: ["string", "null"]
+        deadline:
+          type: ["string", "null"]
+        appliedDate:
+          type: ["string", "null"]
+        interviews:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/InterviewEntry"
+
+    TailorInput:
+      type: object
+      required: [resumeId, jobDescription]
+      properties:
+        resumeId:
+          type: integer
+        jobDescription:
+          type: string
+          minLength: 1
+        customInstructions:
+          type: string
+
+    TailorResult:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    FeedbackInput:
+      type: object
+      required: [resumeId]
+      properties:
+        resumeId:
+          type: integer
+
+    FeedbackSuggestion:
+      type: object
+      required: [bullet, suggestion, rewrite, impact]
+      properties:
+        bullet:
+          type: string
+        suggestion:
+          type: string
+        rewrite:
+          type: string
+        impact:
+          type: integer
+
+    FeedbackResult:
+      type: object
+      required: [suggestions]
+      properties:
+        suggestions:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedbackSuggestion"
+
+    JobSearchInput:
+      type: object
+      properties:
+        resumeId:
+          type: integer
+        jobTitle:
+          type: string
+          description: Optional job title override; if omitted the AI infers the best-fit title from the resume (required when no resume is selected)
+        location:
+          type: string
+        workArrangement:
+          type: string
+          enum: [any, remote, hybrid, onsite]
+          description: Filter by work arrangement
+        employmentType:
+          type: string
+
+    JobResult:
+      type: object
+      required: [id, title, company, url]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: ["string", "null"]
+        salary:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        url:
+          type: string
+        postedAt:
+          type: ["string", "null"]
+        employmentType:
+          type: ["string", "null"]
+        isRemote:
+          type: ["boolean", "null"]
+
+    ResumeAnalysis:
+      type: object
+      required: [jobTitle, seniorityLevel, yearsOfExperience, topSkills, industries, summary]
+      properties:
+        jobTitle:
+          type: string
+        seniorityLevel:
+          type: string
+        yearsOfExperience:
+          type: string
+        topSkills:
+          type: array
+          items:
+            type: string
+        industries:
+          type: array
+          items:
+            type: string
+        summary:
+          type: string
+
+    JobSearchResults:
+      type: object
+      required: [jobs, query, analysis]
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/JobResult"
+        query:
+          type: string
+        analysis:
+          $ref: "#/components/schemas/ResumeAnalysis"
+
+    CoverLetter:
+      type: object
+      required: [id, userId, title, jobTitle, companyName, content, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        title:
+          type: string
+        jobTitle:
+          type: string
+        companyName:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    CoverLetterInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        jobTitle:
+          type: string
+        companyName:
+          type: string
+        content:
+          type: string
+
+    CoverLetterPatch:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        jobTitle:
+          type: string
+        companyName:
+          type: string
+        content:
+          type: string
+
+    KiConversation:
+      type: object
+      required: [id, userId, title, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        title:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    KiConversationDetail:
+      type: object
+      required: [id, userId, title, createdAt, updatedAt, messages]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        title:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/KiMessage"
+
+    KiMessage:
+      type: object
+      required: [id, conversationId, role, content, createdAt]
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+
+    KiConversationInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+
+    KiAppendMessagesInput:
+      type: object
+      required: [messages]
+      properties:
+        messages:
+          type: array
+          items:
+            type: object
+            required: [role, content]
+            properties:
+              role:
+                type: string
+              content:
+                type: string
+
+    InterviewNote:
+      type: object
+      required: [id, userId, title, content, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        applicationId:
+          type: ["integer", "null"]
+        resumeId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    InterviewNoteInput:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        applicationId:
+          type: integer
+        resumeId:
+          type: integer
+
+    InterviewNotePatch:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        applicationId:
+          type: ["integer", "null"]
+        resumeId:
+          type: ["integer", "null"]
+
+    CoverLetterGenerateInput:
+      type: object
+      required: [resumeContent, jobDescription]
+      properties:
+        resumeContent:
+          type: string
+          minLength: 1
+        jobDescription:
+          type: string
+          minLength: 1
+        jobTitle:
+          type: string
+        companyName:
+          type: string
+        customInstructions:
+          type: string
+        existingCoverLetter:
+          type: string
+
+    CoverLetterGenerateResult:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    CheckoutSession:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    KnightedJob:
+      type: object
+      required: [id, title, company, location, description, postedAt, source]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: string
+        salaryMin:
+          type: ["number", "null"]
+        salaryMax:
+          type: ["number", "null"]
+        salaryCurrency:
+          type: ["string", "null"]
+        description:
+          type: string
+        url:
+          type: ["string", "null"]
+        isRemote:
+          type: boolean
+        employmentType:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        postedAt:
+          type: string
+        source:
+          type: string
+          enum: [adzuna, direct]
+        isAgency:
+          type: boolean
+        isPromoted:
+          type: boolean
+
+    KnightedJobSearchResult:
+      type: object
+      required: [jobs, total, page, totalPages]
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/KnightedJob"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+
+    KnightedListing:
+      type: object
+      required: [id, title, company, location, description, contactEmail, postedAt, isActive]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        company:
+          type: string
+        companyWebsite:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        location:
+          type: string
+        isRemote:
+          type: boolean
+        employmentType:
+          type: ["string", "null"]
+        salaryMin:
+          type: ["number", "null"]
+        salaryMax:
+          type: ["number", "null"]
+        salaryCurrency:
+          type: string
+        category:
+          type: ["string", "null"]
+        description:
+          type: string
+        applyUrl:
+          type: ["string", "null"]
+        contactEmail:
+          type: string
+        postedAt:
+          type: string
+        expiresAt:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        reviewUrl:
+          type: ["string", "null"]
+        isAgency:
+          type: boolean
+
+    KnightedListingInput:
+      type: object
+      required: [title, company, location, description, contactEmail]
+      properties:
+        title:
+          type: string
+          minLength: 2
+        company:
+          type: string
+          minLength: 1
+        companyWebsite:
+          type: string
+        logoUrl:
+          type: string
+        location:
+          type: string
+        isRemote:
+          type: boolean
+        employmentType:
+          type: string
+          enum: [full_time, part_time, contract, internship]
+        salaryMin:
+          type: number
+        salaryMax:
+          type: number
+        salaryCurrency:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+          minLength: 50
+        applyUrl:
+          type: string
+        contactEmail:
+          type: string
+
+    KnightedListingsPage:
+      type: object
+      required: [listings, total, page, totalPages]
+      properties:
+        listings:
+          type: array
+          items:
+            $ref: "#/components/schemas/KnightedListing"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+
+    KnightedJobStats:
+      type: object
+      required: [totalJobs, totalCompanies, totalDirectListings, topCategories]
+      properties:
+        totalJobs:
+          type: integer
+        totalCompanies:
+          type: integer
+        totalDirectListings:
+          type: integer
+        topCategories:
+          type: array
+          items:
+            type: object
+            required: [name, count]
+            properties:
+              name:
+                type: string
+              count:
+                type: integer
+
+    KnightedSavedJob:
+      type: object
+      required: [id, userId, jobId, jobSnapshot, savedAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        jobId:
+          type: string
+        jobSnapshot:
+          $ref: "#/components/schemas/KnightedJob"
+        savedAt:
+          type: string
+
+    KnightedSavedJobsPage:
+      type: object
+      required: [savedJobs]
+      properties:
+        savedJobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/KnightedSavedJob"
+
+    SaveJobInput:
+      type: object
+      required: [jobId, jobSnapshot]
+      properties:
+        jobId:
+          type: string
+        jobSnapshot:
+          $ref: "#/components/schemas/KnightedJob"
+
+    KnightedJobAlert:
+      type: object
+      required: [id, userId, email, query, remoteOnly, isActive, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        email:
+          type: string
+        query:
+          type: string
+        location:
+          type: ["string", "null"]
+        employmentType:
+          type: ["string", "null"]
+        remoteOnly:
+          type: boolean
+        isActive:
+          type: boolean
+        lastSentAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    CreateJobAlertInput:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+        query:
+          type: string
+        location:
+          type: string
+        employmentType:
+          type: string
+          enum: [full_time, part_time, contract, internship]
+        remoteOnly:
+          type: boolean
+
+    SeekerProfile:
+      type: object
+      required: [userId, updatedAt]
+      properties:
+        userId:
+          type: string
+        jobTitle:
+          type: ["string", "null"]
+        skills:
+          type: ["string", "null"]
+          description: Comma-separated list of skills
+        experienceYears:
+          type: ["integer", "null"]
+        location:
+          type: ["string", "null"]
+        remotePreference:
+          type: ["string", "null"]
+          enum: [any, remote, hybrid, onsite, "null"]
+        updatedAt:
+          type: string
+
+    SeekerProfileInput:
+      type: object
+      properties:
+        jobTitle:
+          type: string
+        skills:
+          type: string
+          description: Comma-separated list of skills
+        experienceYears:
+          type: integer
+        location:
+          type: string
+        remotePreference:
+          type: string
+          enum: [any, remote, hybrid, onsite]
+
+    MatchScoreInput:
+      type: object
+      required: [resumeText, jobDescription]
+      properties:
+        resumeText:
+          type: string
+          minLength: 50
+        jobDescription:
+          type: string
+          minLength: 50
+
+    MatchScoreResult:
+      type: object
+      required: [score, summary, matchedKeywords, missingKeywords, suggestions]
+      properties:
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        summary:
+          type: string
+        matchedKeywords:
+          type: array
+          items:
+            type: string
+        missingKeywords:
+          type: array
+          items:
+            type: string
+        suggestions:
+          type: array
+          items:
+            type: string
+
+    JobApplicationInput:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        linkedinUrl:
+          type: string
+        coverNote:
+          type: string
+        resumeText:
+          type: string

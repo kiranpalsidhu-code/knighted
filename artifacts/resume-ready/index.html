@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Knighted Resume — AI Resume Tailoring &amp; Job Tracker</title>
+    <meta name="description" content="Knighted Resume — AI-powered resume builder and job application tracker. Tailor your resume to any job in seconds, get ATS feedback, and track your pipeline." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="Knighted Resume — AI Resume Tailoring &amp; Job Tracker" />
+    <meta property="og:description" content="Knighted Resume — AI-powered resume builder and job application tracker. Tailor your resume to any job in seconds, get ATS feedback, and track your pipeline." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://theknightedresume.com/opengraph.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Knighted Resume — AI Resume Tailoring &amp; Job Tracker" />
+    <meta name="twitter:description" content="Tailor your resume to any job in seconds with AI. Track applications, get ATS feedback, and land more interviews." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#2563EB" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Domain router: redirect theknightedjobs.com visitors to the Knighted Jobs app -->
+    <script>
+      (function() {
+        if (window.location.hostname === 'theknightedjobs.com' || window.location.hostname === 'www.theknightedjobs.com') {
+          var dest = '/knighted-jobs' + window.location.pathname.replace(/^\/knighted-jobs/, '') + window.location.search + window.location.hash;
+          window.location.replace(dest);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
