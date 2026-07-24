@@ -30,3 +30,7 @@ pnpm-debug.log*
 coverage/
 .cache/
 tmp/
+
+API Keys_Secrets_knighted Jobs.txt
+restore.zip
+restore/
